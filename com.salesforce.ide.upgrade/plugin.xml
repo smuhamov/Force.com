@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+
+<!--
+Force.com IDE Copyright (c) 2008 Salesforce.com
+-->
+
+<plugin>
+
+    <!--   N A T U R E S   &   B U I L D E R S   -->
+    <!-- upgrade -->
+    <extension point="org.eclipse.core.resources.natures"
+        id="com.salesforce.ide.nature.upgrade"
+        name="Force.com Upgrade Nature">
+        <runtime>
+            <run class="com.salesforce.ide.upgrade.project.UpgradeNature" />
+        </runtime>
+        <builder id="com.salesforce.ide.builder.upgrade"/>
+        <options allowLinking="true" />
+    </extension>
+
+    <extension point="org.eclipse.core.resources.builders"
+        id="com.salesforce.ide.builder.upgrade"
+        name="Force.com Upgrade Builder">
+        <builder hasNature="true" isConfigurable="true">
+        <run class="com.salesforce.ide.upgrade.project.UpgradeBuilder">
+            <parameter name="beanId" value="builderController"/>
+         </run>
+      </builder>
+    </extension>
+
+    <!--   P R O B L E M   M A R K E R S   -->
+    <extension
+        id="dirty"
+        name="Force.com project upgrade required"
+        point="org.eclipse.core.resources.markers">
+        <super type="com.salesforce.ide.core.dirty"/>
+        <persistent value="true"/>
+    </extension>
+    
+    <extension
+         id="inactive"
+         name="Force.com project upgrade required"
+         point="org.eclipse.core.resources.markers">
+        <super type="com.salesforce.ide.core.inactive"/>
+        <persistent value="true"/>
+    </extension>
+
+  <!--   M E N U S  -->
+  <extension point="org.eclipse.ui.menus">
+    <menuContribution allPopups="false" locationURI="popup:com.salesforce.ide.ui.menu.context?before=group0">
+      <command commandId="com.salesforce.ide.ui.command.upgradeProject" helpContextId="com.salesforce.ide.documentation.upgradeProject" id="upgradeProject" label="Upgrade Project..." mnemonic="U" style="push" tooltip="%tooltip.upgrade">
+        <visibleWhen checkEnabled="false">
+          <and>
+            <count value="1"/>
+            <iterate ifEmpty="false" operator="and">
+              <reference definitionId="com.salesforce.ide.projectInactive"/>
+              <adapt type="org.eclipse.core.resources.IProject">
+                <instanceof value="org.eclipse.core.resources.IProject"/>
+              </adapt>
+            </iterate>
+          </and>
+        </visibleWhen>
+      </command>
+    </menuContribution>
+  </extension>
+
+  <extension point="org.eclipse.ui.commands">
+    <command
+      categoryId="com.salesforce.ide.ui.commands.category"
+      description="%tooltip.upgrade"
+      helpContextId="com.salesforce.ide.documentation.upgradeProject"
+      id="com.salesforce.ide.ui.command.upgradeProject"
+      name="Upgrade Project"
+      />
+  </extension>
+
+  <extension point="org.eclipse.ui.handlers">
+    <handler class="com.salesforce.ide.upgrade.ui.handlers.UpgradeHandler" commandId="com.salesforce.ide.ui.command.upgradeProject">
+      <enabledWhen>
+        <and>
+          <count value="1"/>
+          <iterate ifEmpty="false" operator="and">
+            <adapt type="org.eclipse.core.resources.IProject">
+              <instanceof value="org.eclipse.core.resources.IProject"/>
+            </adapt>
+            <reference definitionId="com.salesforce.ide.projectInactive"/>
+          </iterate>
+        </and>
+      </enabledWhen>
+    </handler>
+  </extension>
+
+  <!--   S T A R T U P   -->
+  <extension point="org.eclipse.ui.startup">
+    <startup class="com.salesforce.ide.upgrade.internal.UpgradeStartup"/>
+  </extension>
+
+</plugin>

@@ -1,0 +1,740 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+
+<!--
+    Force.com IDE Copyright (c) 2008 Salesforce.com
+-->
+
+<plugin>
+   <extension-point id="syncServices" name="Force.com IDE Sync Services" schema="schema/syncServices.exsd"/>
+   <extension-point id="debugServices" name="Force.com IDE Debug Services" schema="schema/debugServices.exsd"/>
+
+   <extension point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="com.salesforce.ide.ui.views.runtest.RunTestsLaunchConfigurationDelegate"
+            delegateDescription="The Apex Test Launcher supports running Apex Tests on Salesforce.com instances."
+            delegateName="Apex Test Launcher"
+            id="com.salesforce.ide.core.launch.RunTestsLaunchConfiguration"
+            modes="run"
+            name="Apex Test">
+      </launchConfigurationType>
+   </extension>
+
+    <!--   N A T U R E S   &   B U I L D E R S   -->
+    <!-- default -->
+    <extension point="org.eclipse.core.resources.natures"
+        id="com.salesforce.ide.nature.default"
+        name="%nature.label.0">
+        <runtime>
+            <run class="com.salesforce.ide.core.project.DefaultNature" />
+        </runtime>
+        <builder id="com.salesforce.ide.builder.default"/>
+        <options allowLinking="true" />
+    </extension>
+
+    <extension point="org.eclipse.core.resources.builders"
+        id="com.salesforce.ide.builder.default"
+        name="%builder.label.0">
+        <builder
+            hasNature="true"
+            isConfigurable="false">
+         <run class="com.salesforce.ide.core.project.DefaultBuilder">
+            <parameter name="beanId" value="builderController"/>
+         </run>
+      </builder>
+    </extension>
+
+  <extension point="org.eclipse.core.expressions.definitions">
+    <definition id="com.salesforce.ide.projectFile">
+      <adapt type="org.eclipse.core.resources.IResource">
+        <test
+          property="org.eclipse.core.resources.projectNature"
+          value="com.salesforce.ide.nature.default"/>
+      </adapt>
+    </definition>
+  </extension>
+
+    <!-- online -->
+    <extension point="org.eclipse.core.resources.natures"
+        id="com.salesforce.ide.nature.online"
+        name="%nature.label.1">
+        <runtime>
+            <run class="com.salesforce.ide.core.project.OnlineNature" />
+        </runtime>
+        <builder id="com.salesforce.ide.builder.online"/>
+        <options allowLinking="true" />
+    </extension>
+
+    <extension point="org.eclipse.core.resources.builders"
+        id="com.salesforce.ide.builder.online"
+        name="%builder.label.1">
+        <builder
+            hasNature="true"
+            isConfigurable="true">
+         <run class="com.salesforce.ide.core.project.OnlineBuilder">
+            <parameter name="beanId" value="builderController"/>
+         </run>
+      </builder>
+    </extension>
+
+  <extension point="org.eclipse.core.expressions.definitions">
+    <definition id="com.salesforce.ide.projectOnline">
+      <adapt type="org.eclipse.core.resources.IResource">
+        <test
+          property="org.eclipse.core.resources.projectNature"
+          value="com.salesforce.ide.nature.online"/>
+      </adapt>
+    </definition>
+    <definition id="com.salesforce.ide.projectOffline">
+      <not>
+        <reference definitionId="com.salesforce.ide.projectOnline"/>
+      </not>
+    </definition>
+  </extension>
+
+    <!-- inactive -->
+    <extension point="org.eclipse.core.resources.natures"
+        id="com.salesforce.ide.nature.inactive"
+        name="%nature.label.2">
+        <runtime>
+            <run class="com.salesforce.ide.core.project.InactiveNature" />
+        </runtime>
+        <options allowLinking="true" />
+    </extension>
+
+  <extension point="org.eclipse.core.expressions.definitions">
+    <definition id="com.salesforce.ide.projectInactive">
+      <adapt type="org.eclipse.core.resources.IResource">
+        <test
+          property="org.eclipse.core.resources.projectNature"
+          value="com.salesforce.ide.nature.inactive"/>
+      </adapt>
+    </definition>
+    <definition id="com.salesforce.ide.projectActive">
+      <not>
+        <reference definitionId="com.salesforce.ide.projectInactive"/>
+      </not>
+    </definition>
+    <definition id="com.salesforce.ide.projectRefreshable">
+      <adapt type="org.eclipse.core.resources.IResource">
+        <test forcePluginActivation="true" property="com.salesforce.ide.core.expressions.isRefreshableResource"/>
+      </adapt>
+    </definition>
+    <definition id="com.salesforce.ide.projectSourceResource">
+      <adapt type="org.eclipse.core.resources.IResource">
+        <test forcePluginActivation="true" property="com.salesforce.ide.core.expressions.isSourceResource"/>
+      </adapt>
+    </definition>
+    <definition id="com.salesforce.ide.projectDeployableResource">
+       <adapt type="org.eclipse.core.resources.IResource">
+         <test forcePluginActivation="true" property="com.salesforce.ide.core.expressions.isDeployableResource"/>
+       </adapt>
+    </definition>
+  </extension>
+
+    <!--   C O N T E N T   T Y P E S   -->
+    <extension point="org.eclipse.core.contenttype.contentTypes">
+
+       <content-type
+            id="com.salesforce.ide.core.contentType.settings"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="settings"
+            name="Settings"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}MobileSettings"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}Settings"/>
+                <!--
+                 | The following is a (possibly incomplete) list of root elements
+                 | that I have seen in files with a ".settings" extension.
+                 +-->
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}AccountSettings"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}ActivitiesSettings"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}AddressSettings"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}BusinessHoursSettings"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CaseSettings"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}ChatterAnswersSettings"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CompanySettings"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}ContractSettings"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}IdeasSettings"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}OpportunitySettings"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}OrderSettings"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}ProductSettings"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}QuoteSettings"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}SecuritySettings"/>
+            </describer>
+        </content-type>
+
+       <content-type
+            id="com.salesforce.ide.core.contentType.sharingRules"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="sharingRules"
+            name="SharingRules"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}AccountSharingRules"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}AccountTerritorySharingRules"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CampaignSharingRules"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CaseSharingRules"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}ContactSharingRules"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CustomObjectSharingRules"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}LeadSharingRules"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}OpportunitySharingRules"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}UserSharingRules"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}AccountOwnerSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}AccountCriteriaBasedSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}AccountTerritorySharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CampaignOwnerSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CampaignCriteriaBasedSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CaseOwnerSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CaseCriteriaBasedSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}ContactOwnerSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}ContactCriteriaBasedSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CustomObjectOwnerSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CustomObjectCriteriaBasedSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}LeadOwnerSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}LeadCriteriaBasedSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}OpportunityOwnerSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}OpportunityCriteriaBasedSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}UserMembershipSharingRule"/>
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}UserCriteriaBasedSharingRule"/>
+            </describer>
+        </content-type>
+
+       <content-type
+            id="com.salesforce.ide.core.contentType.analyticSnapshot"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="snapshot"
+            name="Analytic Snapshot"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}AnalyticSnapshot"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.remoteSiteSetting"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="remoteSite"
+            name="Remote Site Setting"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}RemoteSiteSetting"/>
+            </describer>
+        </content-type>
+
+        <content-type
+              base-type="com.salesforce.ide.core.contentType.apex"
+              default-charset="UTF-8"
+              file-extensions="cls"
+              id="com.salesforce.ide.core.contentType.class"
+              name="Apex Class"
+              priority="normal"/>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.page"
+            base-type="org.eclipse.wst.html.core.htmlsource"
+            file-extensions="page"
+            name="Visualforce Page"
+            priority="normal"
+            default-charset="UTF-8"/>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.component"
+            base-type="org.eclipse.wst.html.core.htmlsource"
+            file-extensions="component"
+            name="Visualforce Component"
+            priority="normal"
+            default-charset="UTF-8"/>
+
+        <content-type
+              base-type="org.eclipse.core.runtime.text"
+              default-charset="UTF-8"
+              id="com.salesforce.ide.core.contentType.apex"
+              name="Apex Code"
+              priority="normal">
+        </content-type>
+
+
+        <content-type
+              base-type="com.salesforce.ide.core.contentType.apex"
+              default-charset="UTF-8"
+              file-extensions="trigger"
+              id="com.salesforce.ide.core.contentType.trigger"
+              name="Apex Trigger"
+              priority="normal"/>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.application"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="app"
+            name="Custom Application"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CustomApplication"/>
+            </describer>
+        </content-type>
+
+		<content-type
+            id="com.salesforce.ide.core.contentType.customDataType"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="datatype"
+            name="Custom Data Type"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CustomDataType"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.customLabels"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="labels"
+            name="Custom Labels"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CustomLabels"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.customObject"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="object"
+            name="Custom Object"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CustomObject"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.customObjectTranslation"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="objectTranslation"
+            name="Custom Object Translation"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CustomObjectTranslation"/>
+            </describer>
+        </content-type>
+
+		<content-type
+            id="com.salesforce.ide.core.contentType.customPageWebLink"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="weblink"
+            name="Custom Page Web Link"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CustomPageWebLink"/>
+            </describer>
+        </content-type>
+
+		<content-type
+            id="com.salesforce.ide.core.contentType.site"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="site"
+            name="Custom Site"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CustomSite"/>
+            </describer>
+        </content-type>
+
+		<content-type
+            id="com.salesforce.ide.core.contentType.dashboard"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="dashboard"
+            name="Dashboard"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}Dashboard"/>
+            </describer>
+        </content-type>
+
+		<content-type
+            id="com.salesforce.ide.core.contentType.dataCategoryGroup"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="datacategorygroup"
+            name="Data Category Group"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}DataCategoryGroup"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.entitlementTemplate"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="entitlementtemplate"
+            name="Entitlement Template"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+              <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}EntitlementTemplate"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.email"
+            base-type="org.eclipse.core.runtime.text"
+            file-extensions="email"
+            name="Email Template"
+            priority="normal"
+            default-charset="UTF-8"/>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.layout"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="layout"
+            name="Page Layout"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}Layout"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.letterHead"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="letter"
+            name="Letterhead"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadataa}Letterhead"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.homePageComponent"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="homePageComponent"
+            name="HomePage Component"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}HomePageComponent"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.homePageLayout"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="homePageLayout"
+            name="HomePage Layout"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}HomePageLayout"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.tab"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="tab"
+            name="Custom Tab"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}CustomTab"/>
+            </describer>
+        </content-type>
+
+		<content-type
+            id="com.salesforce.ide.core.contentType.package"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="xml"
+            name="Package Manifest"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}Package"/>
+            </describer>
+        </content-type>
+
+		<content-type
+            id="com.salesforce.ide.core.contentType.portal"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="portal"
+            name="Portal"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}Portal"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.profile"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="profile"
+            name="Profile"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}Profile"/>
+            </describer>
+        </content-type>
+
+		<content-type
+            id="com.salesforce.ide.core.contentType.permissionSet"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="permissionset"
+            name="Permission Set"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}PermissionSet"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.report"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="report"
+            name="Custom Report"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}Report"/>
+            </describer>
+        </content-type>
+
+		<content-type
+            id="com.salesforce.ide.core.contentType.reportType"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="reportType"
+            name="Report Type"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}ReportType.componentType"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.scontrol"
+            base-type="org.eclipse.wst.html.core.htmlsource"
+            file-extensions="scf"
+            name="S-control"
+            priority="normal"
+            default-charset="UTF-8">
+            <property name="DeveloperName" />
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.translations"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="translation"
+            name="Translations"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}Translations"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.workflow"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="workflow"
+            name="Workflow"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}Workflow"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.appmenu"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="appMenu"
+            name="AppMenu"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}AppMenu"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.sharingset"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="sharingSet"
+            name="SharingSet"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}SharingSet"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.assignmentRules"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="assignmentRules"
+            name="AssignmentRules"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}AssignmentRules"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.community"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="community"
+            name="Community"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}Community"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.flow"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="flow"
+            name="Flow"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}Flow"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.queue"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="queue"
+            name="Queue"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}Queue"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.quickAction"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="quickAction"
+            name="QuickAction"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}QuickAction"/>
+            </describer>
+        </content-type>
+
+        <content-type
+            id="com.salesforce.ide.core.contentType.role"
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="role"
+            name="Role"
+            priority="normal"
+            default-charset="UTF-8">
+            <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+                <parameter name="element" value="{http://soap.sforce.com/2006/04/metadata}Role"/>
+            </describer>
+        </content-type>
+
+    </extension>
+
+
+    <!--   P R O B L E M   M A R K E R S   -->
+    <extension
+        id="problem"
+        name="Force.com sync state"
+        point="org.eclipse.core.resources.markers">
+        <super type="org.eclipse.core.resources.problemmarker"/>
+        <persistent value="true"/>
+    </extension>
+
+    <extension
+        id="dirty"
+        name="Force.com sync state"
+        point="org.eclipse.core.resources.markers">
+        <super type="com.salesforce.ide.core.problem"/>
+        <persistent value="true"/>
+    </extension>
+
+    <extension
+         id="compileError"
+         name="Force.com compilation problem"
+         point="org.eclipse.core.resources.markers">
+        <super type="com.salesforce.ide.core.problem"/>
+        <persistent value="true"/>
+    </extension>
+
+    <extension
+         id="saveError"
+         name="Force.com save problem"
+         point="org.eclipse.core.resources.markers">
+        <super type="com.salesforce.ide.core.problem"/>
+        <persistent value="true"/>
+    </extension>
+
+    <extension
+         id="retrieveError"
+         name="Force.com retrieve problem"
+         point="org.eclipse.core.resources.markers">
+        <super type="com.salesforce.ide.core.problem"/>
+        <persistent value="true"/>
+    </extension>
+
+    <extension
+         id="runTestFailure"
+         name="Force.com run test failure"
+         point="org.eclipse.core.resources.markers">
+        <super type="com.salesforce.ide.core.problem"/>
+        <persistent value="true"/>
+    </extension>
+
+    <extension
+         id="codeCoverageWarning"
+         name="Force.com code coverage warning"
+         point="org.eclipse.core.resources.markers">
+        <super type="org.eclipse.core.resources.textmarker"/>
+        <persistent value="false"/>
+    </extension>
+
+    <extension
+         id="inactive"
+         name="Force.com project inactive"
+         point="org.eclipse.core.resources.markers">
+        <super type="com.salesforce.ide.core.problem"/>
+        <persistent value="true"/>
+    </extension>
+
+    <!--   M I S C E L L A N E O U S   -->
+    <extension point="org.eclipse.core.expressions.propertyTesters">
+        <propertyTester
+            id="com.salesforce.ide.core.expressions.ResourceTester"
+            type="org.eclipse.core.resources.IResource"
+            namespace="com.salesforce.ide.core.expressions"
+            properties="pathContains,pathStartsWith,isSourceResource,isSourceRoot,isRefreshableResource,isDeployableResource,isSourceComponentFolder,isPrjOrNonRefPkgFolders,isRunTestEnabledResources"
+            class="com.salesforce.ide.core.expressions.ResourceTester">
+        </propertyTester>
+    </extension>
+</plugin>
+

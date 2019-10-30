@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+
+<!--
+    Force.com IDE Copyright (c) 2008 Salesforce.com
+-->
+
+<plugin>
+  <!--   M E N U S  -->
+  <extension point="org.eclipse.ui.menus">
+    <menuContribution allPopups="false" locationURI="menu:com.salesforce.ide.ui.menu.context?before=group0">
+      <command commandId="com.salesforce.ide.ui.command.mergeFields" helpContextId="com.salesforce.ide.documentation.mergeFields" id="mergeFields" label="%action.label" mnemonic="M" style="push" tooltip="%tooltip.MergeFields">
+        <visibleWhen checkEnabled="false">
+          <with variable="activeEditorId">
+            <or>
+              <equals value="com.salesforce.ide.ui.editors.apex"/>
+              <equals value="com.salesforce.ide.ui.editors.html"/>
+            </or>
+          </with>
+        </visibleWhen>
+      </command>
+    </menuContribution>
+  </extension>
+
+  <extension point="org.eclipse.ui.commands">
+    <command
+      categoryId="com.salesforce.ide.ui.commands.category"
+      description="%tooltip.MergeFields"
+      helpContextId="com.salesforce.ide.documentation.mergeFields"
+      id="com.salesforce.ide.ui.command.mergeFields"
+      name="%action.label"
+      />
+  </extension>
+
+  <extension point="org.eclipse.ui.handlers">
+    <handler class="com.salesforce.ide.ui.editors.handlers.MergeFieldsHandler" commandId="com.salesforce.ide.ui.command.mergeFields">
+      <activeWhen>
+        <with variable="activeEditorId">
+          <or>
+            <equals value="com.salesforce.ide.ui.editors.apex"/>
+            <equals value="com.salesforce.ide.ui.editors.html"/>
+          </or>
+        </with>
+      </activeWhen>
+    </handler>
+  </extension>
+
+    <!--   E D I T O R S  -->
+    <extension point="org.eclipse.ui.editors">
+        <!-- visual force -->
+        <editor
+            id="com.salesforce.ide.ui.editors.html"
+            class="com.salesforce.ide.ui.editors.visualforce.VisualForceMultiPageEditor"
+            contributorClass="com.salesforce.ide.ui.editors.visualforce.VisualForceEditorContributor"
+            default="true"
+            extensions="scf, scf-meta.xml, page, page-meta.xml, component, component-meta.xml"
+            icon="icons/appExDevIco16.png"
+            name="%editor.name.Scontrol">
+                <contentTypeBinding contentTypeId="com.salesforce.ide.core.contentType.scontrol" />
+                <contentTypeBinding contentTypeId="com.salesforce.ide.core.contentType.page" />
+                <contentTypeBinding contentTypeId="com.salesforce.ide.core.contentType.component" />
+        </editor>
+
+        <!-- apex class/trigger editor -->
+        <editor
+            id="com.salesforce.ide.ui.editors.apex"
+            class="com.salesforce.ide.ui.editors.apex.ApexCodeMultiPageEditor"
+            contributorClass="com.salesforce.ide.ui.editors.apex.ApexActionContributor"
+            default="true"
+            extensions="cls, cls-meta.xml, trigger, trigger-meta.xml"
+            icon="icons/appExDevIco16.png"
+            name="%editor.name.ApexCode">
+                <contentTypeBinding contentTypeId="com.salesforce.ide.core.contentType.class" />
+                <contentTypeBinding contentTypeId="com.salesforce.ide.core.contentType.trigger" />
+        </editor>
+    </extension>
+
+    <extension point="org.eclipse.ui.editors.documentProviders">
+        <provider
+            id="org.eclipse.wst.html.ui.internal.ExternalFileDocumentProvider"
+            class="org.eclipse.ui.editors.text.TextFileDocumentProvider"
+            extensions="scf, page"
+            inputTypes="org.eclipse.eclipse.ui.IFileEditorInput" />
+    </extension>
+
+    <extension id="apex.document.setup"
+        name="%document.name.Apex"
+        point="org.eclipse.core.filebuffers.documentSetup">
+        <participant extensions="cls, trigger"
+            class="com.salesforce.ide.ui.editors.apex.ApexDocumentSetupParticipant">
+        </participant>
+    </extension>
+    <extension
+          point="org.eclipse.ui.editors.documentProviders">
+       <provider
+             class="com.salesforce.ide.ui.editors.apex.ApexDocumentProvider"
+             extensions="cls"
+             id="com.salesforce.ide.ui.editors.ApexDocumentProvider"
+             inputTypes="org.eclipse.ui.IFileEditorInput">
+       </provider>
+    </extension>
+    
+    <extension
+         point="org.eclipse.ui.editors.annotationTypes">
+         <type
+             name="highlightNotCovered"
+             super="org.eclipse.ui.workbench.texteditor.info"
+             markerType="com.salesforce.ide.core.codeCoverageWarning">
+         </type>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="highlightNotCovered"
+            colorPreferenceKey="highlightNotCovered.color"
+            colorPreferenceValue="255,0,0"
+            contributesToHeader="false"
+            highlightPreferenceKey="highlightNotCovered.background"
+            highlightPreferenceValue="true"
+            includeOnPreferencePage="true"
+            label="Apex Code Coverage"
+            overviewRulerPreferenceKey="highlightNotCovered.ruler.overview"
+            overviewRulerPreferenceValue="true"
+            presentationLayer="0"
+            textPreferenceKey="hightlightNotCovered.text"
+            textPreferenceValue="true"
+            textStylePreferenceValue="BOX"
+            verticalRulerPreferenceKey="hightlightNotCovered.ruler.vertical"
+            verticalRulerPreferenceValue="true">
+      </specification>
+   </extension>
+   
+   <extension point="org.eclipse.ui.popupMenus">
+      <viewerContribution
+            id="com.salesforce.ide.ui.editors.rulerContribution"
+            targetID="#ApexDebuggerRulerContext">
+         <action
+               label="Add Bookmark"
+               class="org.eclipse.ui.texteditor.BookmarkRulerAction"
+               menubarPath="add"
+               id="org.eclipse.ui.texteditor.BookmarkRulerAction">
+         </action>
+      </viewerContribution>
+   </extension>
+
+    <!--   P R E F E N C E S  -->
+    <extension point="org.eclipse.core.runtime.preferences">
+      <initializer class="com.salesforce.ide.ui.editors.apex.preferences.PreferenceInitializer"/>
+	</extension>
+
+    <extension point="org.eclipse.ui.preferencePages">
+       <page
+             category="com.salesforce.ide.ui.preferences.GeneralPreferencePage"
+             class="com.salesforce.ide.ui.editors.apex.preferences.ApexEditorPreferencePage"
+             id="com.salesforce.ide.ui.editors.apex.preferences.ApexEditorPreferencePage"
+             name="%preferences.page.Apex"/>
+       <page
+             category="com.salesforce.ide.ui.preferences.GeneralPreferencePage"
+             class="org.eclipse.ui.internal.dialogs.EmptyPreferencePage"
+             id="com.salesforce.ide.ui.editors.apex.preferences.VisualforceEditorPreferencePage"
+             name="%preferences.page.Visualforce"/>
+       <page
+             category="com.salesforce.ide.ui.preferences.GeneralPreferencePage"
+             class="org.eclipse.ui.internal.dialogs.EmptyPreferencePage"
+             id="com.salesforce.ide.ui.editors.apex.preferences.LightningEditorPreferencePage"
+             name="Lightning"/>
+       <page
+             name="Templates"
+             category="com.salesforce.ide.ui.editors.apex.preferences.ApexEditorPreferencePage"
+             class="com.salesforce.ide.ui.editors.apex.preferences.ApexTemplatePreferencePage"
+             id="com.salesforce.ide.ui.editors.apex.TemplatesPreferencePage">
+             <keywordReference id="com.salesforce.ide.ui.editors.templates.apexTemplateKeywords"/>
+       </page>
+       <page
+             name="Templates"
+             category="com.salesforce.ide.ui.editors.apex.preferences.VisualforceEditorPreferencePage"
+             class="com.salesforce.ide.ui.editors.visualforce.preferences.VisualforceTemplatePreferencePage"
+             id="com.salesforce.ide.ui.editors.visualforce.TemplatesPreferencePage">
+             <keywordReference id="com.salesforce.ide.ui.editors.templates.visualforceTemplateKeywords"/>
+       </page>
+       <page
+             name="Templates"
+             category="com.salesforce.ide.ui.editors.apex.preferences.LightningEditorPreferencePage"
+             class="com.salesforce.ide.ui.editors.lightning.preferences.LightningTemplatePreferencePage"
+             id="com.salesforce.ide.ui.editors.lightning.TemplatesPreferencePage">
+             <keywordReference id="com.salesforce.ide.ui.editors.templates.lightningTemplateKeywords"/>
+       </page>
+    </extension>
+
+    <extension
+           point="org.eclipse.wst.sse.ui.sourcevalidation">
+        <validator
+              scope="total"
+              class="com.salesforce.ide.ui.editors.page.PageValidator"
+              id="com.salesforce.ide.ui.editors.page.validator">
+           <contentTypeIdentifier
+                 id="com.salesforce.ide.core.contentType.page">
+              <partitionType
+                    id="org.eclipse.wst.html.HTML_DEFAULT">
+              </partitionType>
+           </contentTypeIdentifier>
+        </validator>
+    </extension>
+	
+   <extension point="org.eclipse.ui.keywords">
+      <keyword
+            id="com.salesforce.ide.ui.editors.templates.apexTemplateKeywords"
+            label="apex classes triggers templates"/>
+      <keyword
+            id="com.salesforce.ide.ui.editors.templates.visualforceTemplateKeywords"
+            label="visualforce pages components templates"/>
+      <keyword
+            id="com.salesforce.ide.ui.editors.templates.lightningTemplateKeywords"
+            label="lightning bundle templates"/>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors.templates">
+      <contextTypeRegistry id="com.salesforce.ide.ui.editors.templates.apexContextTypes"/>
+      <contextTypeRegistry id="com.salesforce.ide.ui.editors.templates.visualforceContextTypes"/>
+      <contextTypeRegistry id="com.salesforce.ide.ui.editors.templates.lightningContextTypes"/>
+      <contextType
+            class="com.salesforce.ide.ui.editors.templates.ApexClassTemplateContextType"
+            id="com.salesforce.ide.ui.editors.templates.contextType.apexClass"
+            name="New Class"
+            registryId="com.salesforce.ide.ui.editors.templates.apexContextTypes"/>
+      <contextType
+            class="com.salesforce.ide.ui.editors.templates.ApexTriggerTemplateContextType"
+            id="com.salesforce.ide.ui.editors.templates.contextType.apexTrigger"
+            name="New Trigger"
+            registryId="com.salesforce.ide.ui.editors.templates.apexContextTypes"/>
+      <contextType
+            class="com.salesforce.ide.ui.editors.templates.ApexComponentTemplateContextType"
+            id="com.salesforce.ide.ui.editors.templates.contextType.apexComponent"
+            name="New Component"
+            registryId="com.salesforce.ide.ui.editors.templates.visualforceContextTypes"/>
+      <contextType
+            class="com.salesforce.ide.ui.editors.templates.ApexPageTemplateContextType"
+            id="com.salesforce.ide.ui.editors.templates.contextType.apexPage"
+            name="New Page"
+            registryId="com.salesforce.ide.ui.editors.templates.visualforceContextTypes"/>
+      <contextType
+            class="com.salesforce.ide.ui.editors.templates.LightningTemplateContextType"
+            id="com.salesforce.ide.ui.editors.templates.contextType.lightning"
+            name="New Lightning Element"
+            registryId="com.salesforce.ide.ui.editors.templates.lightningContextTypes"/>
+      <include file="templates/default-templates.xml"/>
+   </extension>
+
+<extension point="org.eclipse.ui.newWizards">
+    <wizard id="com.salesforce.ide.ui.wizards.createApexClass" 
+    	category="com.salesforce.ide.ui.wizards" 
+    	class="com.salesforce.ide.ui.wizards.components.apex.clazz.ApexClassWizard" 
+    	icon="icons/appExDevIco16.png" 
+    	name="Apex Class" 
+    	preferredPerspectives="com.salesforce.ide.perspective" 
+    	project="false" />
+    
+    <wizard id="com.salesforce.ide.ui.wizards.createWSDL2Apex" 
+    	category="com.salesforce.ide.ui.wizards" 
+    	class="com.salesforce.ide.ui.wizards.components.wsdl.WSDL2ApexWizard" 
+    	hasPages="true" 
+    	icon="icons/appExDevIco16.png" 
+    	name="Apex Class from WSDL" 
+    	preferredPerspectives="com.salesforce.ide.perspective" 
+    	project="false" />
+
+    <wizard id="com.salesforce.ide.ui.wizards.createApexComponent"
+        category="com.salesforce.ide.ui.wizards"
+        class="com.salesforce.ide.ui.wizards.components.apex.component.ApexComponentWizard"
+        hasPages="true"
+        icon="icons/appExDevIco16.png"
+        name="Visualforce Component"
+        preferredPerspectives="com.salesforce.ide.perspective"
+        project="false"/>
+
+    <wizard id="com.salesforce.ide.ui.wizards.createApexPage" 
+    	category="com.salesforce.ide.ui.wizards" 
+    	class="com.salesforce.ide.ui.wizards.components.apex.page.ApexPageWizard" 
+    	icon="icons/appExDevIco16.png" 
+    	name="Visualforce Page" 
+    	preferredPerspectives="com.salesforce.ide.perspective" 
+    	project="false" />
+    
+    <wizard id="com.salesforce.ide.ui.wizards.createApexTrigger" 
+    	category="com.salesforce.ide.ui.wizards" 
+    	class="com.salesforce.ide.ui.wizards.components.apex.trigger.ApexTriggerWizard" 
+    	icon="icons/appExDevIco16.png" 
+    	name="Apex Trigger" 
+    	preferredPerspectives="com.salesforce.ide.perspective" 
+    	project="false" />
+    	
+    <wizard id="com.salesforce.ide.ui.wizards.createApexTestSuite" 
+        category="com.salesforce.ide.ui.wizards" 
+        class="com.salesforce.ide.ui.wizards.components.apex.test.ApexTestSuiteWizard" 
+        icon="icons/appExDevIco16.png" 
+        name="Apex Test Suite" 
+        preferredPerspectives="com.salesforce.ide.perspective" 
+        project="false" />
+
+    <wizard id="com.salesforce.ide.ui.wizards.createLightningElement" 
+    	category="com.salesforce.ide.ui.wizards" 
+    	class="com.salesforce.ide.ui.wizards.components.lightning.AuraDefinitionBundleWizard" 
+    	icon="icons/appExDevIco16.png" 
+    	name="Lightning Bundle" 
+    	preferredPerspectives="com.salesforce.ide.perspective" 
+    	project="false" />
+    
+    <wizard id="com.salesforce.ide.ui.wizards.createCustomApplication" 
+    	category="com.salesforce.ide.ui.wizards" 
+    	class="com.salesforce.ide.ui.wizards.components.application.CustomApplicationWizard" 
+    	icon="icons/appExDevIco16.png" 
+    	name="Custom Application" 
+    	preferredPerspectives="com.salesforce.ide.perspective" 
+    	project="false" />
+    
+    <wizard id="com.salesforce.ide.ui.wizards.createCustomObject" 
+    	category="com.salesforce.ide.ui.wizards" 
+    	class="com.salesforce.ide.ui.wizards.components.object.CustomObjectWizard" 
+    	icon="icons/appExDevIco16.png" 
+    	name="Custom Object" 
+    	preferredPerspectives="com.salesforce.ide.perspective" 
+    	project="false" />
+    
+    <wizard id="com.salesforce.ide.ui.wizards.createHomePageComponent" 
+    	category="com.salesforce.ide.ui.wizards" 
+    	class="com.salesforce.ide.ui.wizards.components.homepage.component.HomePageComponentWizard" 
+    	icon="icons/appExDevIco16.png" 
+    	name="HomePage Component" 
+    	preferredPerspectives="com.salesforce.ide.perspective" 
+    	project="false" />
+    
+    <wizard id="com.salesforce.ide.ui.wizards.createHomePageLayout" 
+    	category="com.salesforce.ide.ui.wizards" 
+    	class="com.salesforce.ide.ui.wizards.components.homepage.layout.HomePageLayoutWizard" 
+    	icon="icons/appExDevIco16.png" 
+    	name="HomePage Layout" 
+    	preferredPerspectives="com.salesforce.ide.perspective" 
+    	project="false" />
+    
+    <wizard id="com.salesforce.ide.ui.wizards.createLetterhead" 
+    	category="com.salesforce.ide.ui.wizards" 
+    	class="com.salesforce.ide.ui.wizards.components.letterhead.LetterheadWizard" 
+    	icon="icons/appExDevIco16.png" 
+    	name="Letterhead" 
+    	preferredPerspectives="com.salesforce.ide.perspective" 
+    	project="false" />
+    
+    <wizard id="com.salesforce.ide.ui.wizards.createProfile" 
+    	category="com.salesforce.ide.ui.wizards" 
+    	class="com.salesforce.ide.ui.wizards.components.profile.ProfileWizard" 
+    	icon="icons/appExDevIco16.png" 
+    	name="Profile" 
+    	preferredPerspectives="com.salesforce.ide.perspective" 
+    	project="false" />
+    
+    <wizard id="com.salesforce.ide.ui.wizards.createWorkflow" 
+    	category="com.salesforce.ide.ui.wizards" 
+    	class="com.salesforce.ide.ui.wizards.components.workflow.WorkflowWizard" 
+    	icon="icons/appExDevIco16.png" 
+    	name="Workflow" 
+    	preferredPerspectives="com.salesforce.ide.perspective" 
+    	project="false" />
+</extension>
+
+</plugin>
